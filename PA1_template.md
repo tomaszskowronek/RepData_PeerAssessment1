@@ -31,6 +31,9 @@ actDataTableClean <- na.omit(actDataTable)
 ## Calculate the total number of steps taken per day without the NA values
 totalStepsPerDay <- summarize(group_by(actDataTableClean, date), total_steps = sum(steps))
 
+## Open a PNG file device
+png(file="plot1.png")
+
 ## Create a historgram with total steps per day
 with(totalStepsPerDay, hist(total_steps,
                             main = "Total Steps Per Day",
@@ -38,16 +41,20 @@ with(totalStepsPerDay, hist(total_steps,
                             ylab = "Frequency",
                             col = "Red",
                             ylim = c(0,30)))
-```
 
-![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png) 
-
-```r
 ## Calculate the mean of the total number of steps per day
 meanTotalStepsPerDay <- round(with(totalStepsPerDay, mean(total_steps)))
 
 ## Calculate the median of the total number of steps per day
 medianTotalStepsPerDay <- round(with(totalStepsPerDay, median(total_steps)))
+
+## Close the PNG file device
+dev.off()
+```
+
+```
+## png 
+##   2
 ```
 The mean of the total number of steps taken per day is 10766.  
 The median of the total number of steps taken per day is 10765.  
