@@ -18,6 +18,19 @@ actDataFrame <- read.csv("activity.csv", stringsAsFactors = FALSE)
 
 ## Convert data frame to data table which offers much better performance
 actDataTable <- data.table(actDataFrame)
+
+## Displays the first part of the dataset
+head(actDataTable)
+```
+
+```
+##    steps       date interval
+## 1:    NA 2012-10-01        0
+## 2:    NA 2012-10-01        5
+## 3:    NA 2012-10-01       10
+## 4:    NA 2012-10-01       15
+## 5:    NA 2012-10-01       20
+## 6:    NA 2012-10-01       25
 ```
 &nbsp;
 
@@ -25,15 +38,12 @@ actDataTable <- data.table(actDataFrame)
 ##What is the mean total number of steps taken per day?
 
 ```r
-## Remove all records with the NA values
-actDataTableClean <- na.omit(actDataTable)
+## Calculate the total number of steps taken per day ignoring the NA values
+totalStepsPerDay <- summarize(group_by(actDataTable, date), total_steps = sum(steps))
 
-## Calculate the total number of steps taken per day without the NA values
-totalStepsPerDay <- summarize(group_by(actDataTableClean, date), total_steps = sum(steps))
-
-## Create a historgram with total steps per day
+## Create a historgram with total number of steps taken each day
 with(totalStepsPerDay, hist(total_steps,
-                            main = "Total Steps Per Day",
+                            main = "Total Number of Steps Per Day",
                             xlab = "Total Steps",
                             ylab = "Frequency",
                             col = "Red",
@@ -44,10 +54,10 @@ with(totalStepsPerDay, hist(total_steps,
 
 ```r
 ## Calculate the mean of the total number of steps per day
-meanTotalStepsPerDay <- round(with(totalStepsPerDay, mean(total_steps)))
+meanTotalStepsPerDay <- round(with(totalStepsPerDay, mean(total_steps, na.rm=TRUE)))
 
 ## Calculate the median of the total number of steps per day
-medianTotalStepsPerDay <- round(with(totalStepsPerDay, median(total_steps)))
+medianTotalStepsPerDay <- round(with(totalStepsPerDay, median(total_steps, na.rm=TRUE)))
 ```
 The mean of the total number of steps taken per day is 10766.  
 The median of the total number of steps taken per day is 10765.  
@@ -57,10 +67,10 @@ The median of the total number of steps taken per day is 10765.
 ##What is the average daily activity pattern
 
 ```r
-## Calculate the average number of steps taken per 5-minute interval without 
+## Calculate the average number of steps taken per 5-minute interval ignoring 
 ## the NA values
-avgStepsPerInterval <- summarize(group_by(actDataTableClean, interval), 
-                                          avg_steps = mean(steps))
+avgStepsPerInterval <- summarize(group_by(actDataTable, interval), 
+                                          avg_steps = mean(steps, na.rm=TRUE))
 
 ## Create a time series plot of the 5-minute interval (x-axis) and the average
 ## number of steps taken, averaged across all days (y-axis)
@@ -92,8 +102,10 @@ across all the days in the dataset.
 ## Calculate the total number of missing values in the dataset
 totalNumberMissingValues <- count(filter(actDataTable, is.na(steps)))
 
-##  Create a new dataset with all of the missing values in the original dataset
-## filled in with the mean for that 5-minute interval
+## Devise a strategy for filling in all of the missing values in the dataset. 
+## Create a new dataset with all of the missing values in the original dataset
+## filled in with the mean for that 5-minute interval across all days. 
+## It was calculated in the previous task (avgStepsPerInterval).
 actDataTableNew <- actDataTable
 actDataTableNew$steps[is.na(actDataTableNew$steps)] <- 
         avgStepsPerInterval[interval == actDataTableNew[is.na(steps), interval], avg_steps]
@@ -122,6 +134,9 @@ medianTotalStepPerDay <- with(totalStepsPerDay, median(total_steps))
 The total number of missing values in the dataset is 2304.  
 The mean of the total number of steps taken per day is 10766.  
 The median of the total number of steps taken per day is 10765.  
+
+The mean and median do not differ from the estimates from the first part of the assignment.
+
 &nbsp;
 
 
@@ -150,7 +165,8 @@ with(avgStepsPerInterval, xyplot(avg_steps ~ interval | day,
                                type = "l",
                                main = "Average Steps per 5-Minute Interval",
                                xlab = "5-Minute Interval",
-                               ylab = "Average Steps"))
+                               ylab = "Average Steps",
+                               layout=c(1,2)))
 ```
 
 ![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
